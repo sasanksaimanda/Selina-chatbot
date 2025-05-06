@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Mental Wellness Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>Wellness Assistant</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('chat') }}"><i class="fas fa-comment-dots"></i> Chat</a></li>
+                <li><a href="{{ url_for('history') }}"><i class="fas fa-history"></i> History</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                <li class="active"><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i> Admin</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="user-name">Admin</div>
+            </div>
+        </nav>
+        
+        <main class="admin-area">
+            <div class="admin-header">
+                <h3>Admin Dashboard</h3>
+                <p>Manage users and view analytics</p>
+            </div>
+            
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <h4>Total Users</h4>
+                    <div class="stat-value">{{ users|length }}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Total Messages</h4>
+                    <div class="stat-value">{{ users|sum(attribute='message_count') }}</div>
+                </div>
+            </div>
+            
+            <div class="admin-content">
+                <div class="admin-section">
+                    <h4>User Management</h4>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Messages</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.role }}</td>
+                                    <td>{{ user.created_at }}</td>
+                                    <td>{{ user.message_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
