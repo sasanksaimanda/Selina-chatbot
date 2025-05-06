@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat History - Mental Wellness Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>Wellness Assistant</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('chat') }}"><i class="fas fa-comment-dots"></i> Chat</a></li>
+                <li class="active"><a href="{{ url_for('history') }}"><i class="fas fa-history"></i> History</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                {% if session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i> Admin</a></li>
+                {% endif %}
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-name">{{ session.get('username') }}</div>
+            </div>
+        </nav>
+        
+        <main class="history-area">
+            <div class="history-header">
+                <h3>Your Chat History</h3>
+                <p>Review your past conversations</p>
+            </div>
+            
+            <div class="history-content">
+                {% if chats %}
+                    {% for chat_id, messages in chats.items() %}
+                        <div class="history-item">
+                            <div class="history-item-header" onclick="toggleChat('{{ chat_id }}')">
+                                <div class="history-date">{{ messages[0]['timestamp'] }}</div>
+                                <div class="history-preview">{{ messages[0]['content'][:50] }}{% if messages[0]['content']|length > 50 %}...{% endif %}</div>
+                                <div class="history-toggle"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                            
+                            <div class="history-chat-messages" id="chat-{{ chat_id }}" style="display: none;">
+                                {% for message in messages %}
+                                    <div class="message {% if message['sender'] == 'user' %}user-message{% else %}bot-message{% endif %}">
+                                        <div class="message-content">
+                                            <p>{{ message['content'] }}</p>
+                                        </div>
+                                        <div class="message-time">{{ message['timestamp'] }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-history">
+                        <p>You don't have any chat history yet.</p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-primary">Start a Chat</a>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        function toggleChat(chatId) {
+            const chatElement = document.getElementById(`chat-${chatId}`);
+            const isHidden = chatElement.style.display === 'none';
+            
+            chatElement.style.display = isHidden ? 'block' : 'none';
+            
+            // Toggle the icon
+            const icon = event.currentTarget.querySelector('.fa-chevron-down, .fa-chevron-up');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            }
+        }
+    </script>
+</body>
+</html>

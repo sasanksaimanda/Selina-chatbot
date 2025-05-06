@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Mental Wellness Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>Wellness Assistant-Selina</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><a href="{{ url_for('chat') }}"><i class="fas fa-comment-dots"></i> Chat</a></li>
+                <li><a href="{{ url_for('history') }}"><i class="fas fa-history"></i> History</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                {% if session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i> Admin</a></li>
+                {% endif %}
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-name">{{ session.get('username') }}</div>
+            </div>
+        </nav>
+        
+        <main class="chat-area">
+            <div class="chat-header">
+                <h3>Selina</h3>
+                <p>Chat confidentially about your thoughts and feelings</p>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <p>Hello {{ session.get('username') }}! I'm your wellness assistant. How are you feeling today?</p>
+                    </div>
+                    <div class="message-time">Now</div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <form id="message-form">
+                    <input type="text" id="user-message" placeholder="Type your message here..." required>
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageForm = document.getElementById('message-form');
+            const userMessageInput = document.getElementById('user-message');
+            const chatMessages = document.getElementById('chat-messages');
+            
+            messageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const message = userMessageInput.value.trim();
+                if (!message) return;
+                
+                // Add user message to chat
+                addMessageToChat('user', message);
+                
+                // Clear input
+                userMessageInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Send message to server
+                fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `message=${encodeURIComponent(message)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove typing indicator
+                    removeTypingIndicator();
+                    
+                    // Add bot response to chat
+                    addMessageToChat('bot', data.message, data.timestamp);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    removeTypingIndicator();
+                    addMessageToChat('bot', 'Sorry, I encountered an error. Please try again.');
+                });
+            });
+            
+            function addMessageToChat(sender, content, time = 'Just now') {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender === 'user' ? 'user-message' : 'bot-message'}`;
+                
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <p>${content}</p>
+                    </div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                chatMessages.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message bot-message typing-indicator';
+                typingDiv.id = 'typing-indicator';
+                
+                typingDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="typing">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+                
+                chatMessages.appendChild(typingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function removeTypingIndicator() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
