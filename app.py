@@ -161,7 +161,7 @@ def send_message():
         response = co.chat(
             message=message,
             chat_history=chat_history,
-            model="command",  # Use appropriate Cohere model
+            model="command-r",  # Use appropriate Cohere model
             temperature=0.7,
             preamble=system_prompt,
             max_tokens=300
