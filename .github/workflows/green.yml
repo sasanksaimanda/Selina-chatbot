@@ -1,0 +1,20 @@
+name: Daily Contribution
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # Triggers every day at 12:00 UTC
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  make-it-green:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create empty commit
+        run: |
+          git config --global user.name "sasanksaimanda"
+          git config --global user.email "sasankmanda8@gmail.com"
+          git commit --allow-empty -m "Automated daily sync"
+          git push
